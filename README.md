@@ -1,4 +1,4 @@
-TW-Interaction-Pull
+TW Interaction Pull
 ===================
 A Twitter interaction puller with PushBullet push.
 
