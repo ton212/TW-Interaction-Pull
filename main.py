@@ -13,26 +13,45 @@ from config import config, pushbullet_token
 from pushbullet import PushBullet
 import json
 
-p = PushBullet(pushbullet_token)
-
 class StdOutListener(StreamListener):
     """ A listener handles tweets are the received from the stream.
     This is a basic listener that just prints received tweets to stdout.
     """
-    def on_data(self, data):
-        data = json.loads(data)
-        if "text" in data and "@tonsai" in data["text"]:
-            print data["user"]["screen_name"], ":", data["text"].encode("utf-8")
-            msg_title = "Mention from @" + str(data["user"]["screen_name"])
-            msg_body = data["text"].encode("utf-8")
-            p.push_note(msg_title, msg_body)
-        return True
 
-    def on_error(self, status):
-        print status
+    def on_status(self, status):
+        """ Filter if this tweet mentioned you, then push it to PushBullet """
+        if config["username"] in status.text:
+            data = { "sender":status.author.screen_name.encode("utf-8"),
+                     "text":status.text.encode("utf-8")
+                   }
+            print "R | @" + data["sender"] + ": " + data["text"]
+            self.push(data)
+            return True
+
+    def on_direct_message(self, data):
+        """ Filter if this DM belong to you, then push it to PushBullet """
+        if config["username"][1:] in data.direct_message["recipient_screen_name"]:
+            data = { "sender": data.direct_message["sender_screen_name"].encode("utf-8"),
+                     "recipient": data.direct_message["recipient_screen_name"].encode("utf-8"),
+                     "text": data.direct_message['text'].encode("utf-8")
+                   }
+            print "D | @" + data["sender"] + ": " + data["text"]
+            self.push(data)
+            return True
+
+    def push(self, data):
+        """ Push the given data to PushBullet """
+        if "recipient" in data:
+            msg_title = "New DM from @" + data["sender"]
+        else:
+            msg_title = "New mention from @" + data["sender"]
+        msg_body = data["text"]
+        p.push_note(msg_title, msg_body)
+        return True
 
 if __name__ == '__main__':
     l = StdOutListener()
+    p = PushBullet(pushbullet_token)
     auth = OAuthHandler(config["consumer_key"], config["consumer_secret"])
     auth.set_access_token(config["access_token"], config["access_token_secret"])
 
