@@ -43,6 +43,8 @@ class StdOutListener(StreamListener):
         """ Push the given data to PushBullet """
         if "recipient" in data:
             msg_title = "New DM from @" + data["sender"]
+        elif ("RT " + config["username"]) in data["text"]:
+            msg_title = "@" + data["sender"] + " retweeted your tweet."
         else:
             msg_title = "New mention from @" + data["sender"]
         msg_body = data["text"]
