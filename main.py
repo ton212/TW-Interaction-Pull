@@ -44,7 +44,7 @@ class StdOutListener(StreamListener):
         if "recipient" in data:
             msg_title = "New DM from @" + data["sender"]
         elif data["text"][:3] == "RT " and config["username"] in data["text"]:
-            msg_title = "@" + data["sender"] + " retweet your tweet."
+            msg_title = "@" + data["sender"] + " retweeted your tweet."
         else:
             msg_title = "New mention from @" + data["sender"]
         msg_body = data["text"]
