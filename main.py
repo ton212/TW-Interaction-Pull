@@ -39,6 +39,19 @@ class StdOutListener(StreamListener):
             self.push(data)
             return True
 
+    def on_disconnect(self, notice):
+        text = notice.code, ":", notice.reason
+        print "DISCONNECTED! (" + text + ")"
+        p.push_note('Puller disconnected!', text)
+        exit()
+        return True
+
+    def on_warning(self, notice):
+        text = notice.code, ":", notice.message, "(" + notice.percent_full + "%)"
+        print "STALL WARNING! (" + text + ")"
+        p.push_note('STALL WARNING!', text)
+        return True
+
     def push(self, data):
         """ Push the given data to PushBullet """
         if "recipient" in data:
